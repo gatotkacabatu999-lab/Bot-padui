@@ -1,0 +1,33 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "workspaces": [
+    "artifacts/*",
+    "lib/*",
+    "scripts"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n api,web \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "npm run dev --workspace @workspace/api-server",
+    "dev:web": "npm run dev --workspace @workspace/dbrutals",
+    "build": "npm run typecheck && npm run build --workspace @workspace/api-server && npm run build --workspace @workspace/dbrutals",
+    "build:all": "npm run typecheck && npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "npm run typecheck:libs && npm run typecheck --workspaces --if-present"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@replit/connectors-sdk": "^0.4.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.1",
+    "typescript": "~5.9.3"
+  }
+}

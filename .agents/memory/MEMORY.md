@@ -1,0 +1,5 @@
+- [Driver App Architecture](driver-app.md) — Expo driver app fetches /api/routes; requires DATABASE_URL on server; shows graceful empty state without it.
+- [Auth Design](auth-design.md) — APP_PASSWORD enables cookie auth; server throws if SESSION_SECRET absent; driver app has no login yet (needs follow-up).
+- [Baileys pairing lifecycle](baileys-pairing.md) — phone pairing waits for an open socket, may replace pending QR pairing, and only marks connected after WhatsApp confirms.
+- [WhatsApp capture safety](whatsapp-capture-safety.md) — preserve original snapshots before mutations; bound media streams, serve documents as downloads, and never retain auth state in Git.
+- [npm workspace portability](npm-workspace-portability.md) — GitHub clones use npm install without a lockfile; keep Replit's pnpm workflows compatible.

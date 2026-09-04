@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Dbrutals"
+description = "A professional route planning and calendar management application for delivery services. Lets users manage delivery routes, view them on a map, track deliveries, manage calendar events, and optionally control a WhatsApp bot for automated messaging."
+version = "1.0.0"
+id = "artifacts/dbrutals"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20711
+
+[services.development]
+run = "pnpm --filter @workspace/dbrutals run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/dbrutals", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/dbrutals/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20711"
+BASE_PATH = "/"
