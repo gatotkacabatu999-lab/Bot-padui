@@ -11,6 +11,10 @@ out-tsc
 # dependencies
 node_modules
 
+# this is a pnpm workspace; only pnpm-lock.yaml should be committed
+package-lock.json
+yarn.lock
+
 # IDEs and editors
 /.idea
 .project
