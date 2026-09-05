@@ -1185,8 +1185,8 @@ body {
     font-size: var(--fs-md);
   }
 
-  /* Touch-device: larger tap targets */
-  [data-touch="true"] button,
+  /* Touch-device: larger tap targets (exclude switches — they have a fixed track height) */
+  [data-touch="true"] button:not([role="switch"]),
   [data-touch="true"] [role="button"],
   [data-touch="true"] a {
     min-height: 2.75rem;

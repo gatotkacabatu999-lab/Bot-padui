@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Cog, ShieldCheck, Link2, MessageSquareText, Users, UserRound, HelpCircle } from "lucide-react"
+import { Cog, ShieldCheck, Link2, MessageSquareText, Users, UserRound, HelpCircle, ListFilter, Loader2, CheckCircle2 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 
 type MessageBehaviorSettings = {
   respondInGroup: boolean
@@ -228,224 +229,248 @@ export function BotSettings() {
     }
   }, [normalizeGroupList, requestWithFallback, settings])
 
+  const disabled = loading || savingKey !== null
+  const groupRow = settingRows.find((row) => row.key === "respondInGroup")!
+  const privateRow = settingRows.find((row) => row.key === "respondInPrivate")!
+  const anyoneRow = settingRows.find((row) => row.key === "respondForAnyone")!
+  const unknownRow = settingRows.find((row) => row.key === "autoRespondUnknownCommand")!
+
   return (
     <div className="flex flex-col flex-1 min-h-0 gap-4 p-4 md:p-6">
       <div className="rounded-2xl border border-border/70 bg-card/90 p-4 md:p-5 shadow-sm">
-        <h1 className="text-lg md:text-xl font-bold flex items-center gap-2">
-          <Cog className="size-5 text-primary" />
-          Bot Settings
-        </h1>
-        <p className="mt-1 text-xs md:text-sm text-muted-foreground">
-          Manage WhatsApp bot behavior with simple ON/OFF switches.
-        </p>
-      </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-lg md:text-xl font-bold flex items-center gap-2">
+              <Cog className="size-5 text-primary" />
+              Bot Settings
+            </h1>
+            <p className="mt-1 text-xs md:text-sm text-muted-foreground">
+              Manage WhatsApp bot behavior with simple ON/OFF switches.
+            </p>
+          </div>
 
-      <div className="rounded-2xl border border-border/70 bg-card/90 p-4 md:p-5 shadow-sm">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Behavior Switches</p>
-          {loading ? <span className="text-[11px] text-muted-foreground">Loading...</span> : null}
-          {!loading && savingKey ? <span className="text-[11px] text-muted-foreground">Saving...</span> : null}
-          {!loading && !savingKey && savedAt ? <span className="text-[11px] text-emerald-600 dark:text-emerald-400">Saved</span> : null}
-        </div>
-
-        <div className="mt-3 divide-y divide-border/60 rounded-xl border border-border/60 bg-background/60">
-          {settingRows.map((item) => {
-            const Icon = item.icon
-            const disabled = loading || savingKey !== null
-
-            if (item.key === "respondInGroup") {
-              return (
-                <div key={item.key} className="px-3 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold flex items-center gap-2">
-                        <Icon className="size-4 text-primary/80 shrink-0" />
-                        {item.title}
-                      </p>
-                      <p className="mt-1 text-[11px] text-muted-foreground">{item.desc}</p>
-                    </div>
-                    <Switch
-                      size="sm"
-                      checked={settings.respondInGroup}
-                      disabled={disabled}
-                      onCheckedChange={(checked) => {
-                        void updateSetting("respondInGroup", checked)
-                      }}
-                    />
-                  </div>
-
-                  {settings.respondInGroup ? (
-                    <div className="mt-3 ml-6 rounded-lg border border-border/60 bg-muted/20 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-[11px] font-medium text-muted-foreground">Hanya group terpilih</p>
-                        <Switch
-                          size="sm"
-                          checked={settings.respondOnlySelectedGroups}
-                          disabled={disabled}
-                          onCheckedChange={(checked) => {
-                            void updateSetting("respondOnlySelectedGroups", checked)
-                          }}
-                        />
-                      </div>
-
-                      {settings.respondOnlySelectedGroups ? (
-                        <div className="mt-3 space-y-3">
-                          <Textarea
-                            value={settings.allowedGroups.join(",\n")}
-                            rows={3}
-                            disabled={disabled}
-                            placeholder="123456789012345@g.us, 987654321098765@g.us"
-                            className="min-h-20 resize-y text-xs"
-                            onChange={(event) => {
-                              void handleAllowedGroupsChange(normalizeGroupList(event.target.value))
-                            }}
-                          />
-
-                          {settings.allowedGroups.length ? (
-                            <div className="space-y-2">
-                              {settings.allowedGroups.map((groupId, index) => (
-                                <div key={`${groupId}-${index}`} className="flex items-center justify-between gap-2 rounded-md border border-border/70 bg-background/80 px-2 py-1.5">
-                                  <span className="truncate text-[10px] text-muted-foreground">{groupId}</span>
-                                  <Switch
-                                    size="sm"
-                                    checked
-                                    disabled={disabled}
-                                    onCheckedChange={() => {
-                                      const nextGroups = settings.allowedGroups.filter((_, groupIndex) => groupIndex !== index)
-                                      void handleAllowedGroupsChange(nextGroups)
-                                    }}
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : null}
-                </div>
-              )
-            }
-
-            if (item.key === "respondForAnyone") {
-              return (
-                <div key={item.key} className="px-3 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold flex items-center gap-2">
-                        <Icon className="size-4 text-primary/80 shrink-0" />
-                        {item.title}
-                      </p>
-                      <p className="mt-1 text-[11px] text-muted-foreground">{item.desc}</p>
-                    </div>
-                    <Switch
-                      size="sm"
-                      checked={settings.respondForAnyone}
-                      disabled={disabled}
-                      onCheckedChange={(checked) => {
-                        void updateSetting("respondForAnyone", checked)
-                      }}
-                    />
-                  </div>
-
-                  {!settings.respondForAnyone ? (
-                    <div className="mt-3 ml-6 rounded-lg border border-border/60 bg-muted/20 p-3">
-                      <label className="block text-[11px] font-medium text-muted-foreground">Allowed_Numbers</label>
-                      <Textarea
-                        value={settings.allowedNumbers}
-                        rows={2}
-                        disabled={disabled}
-                        placeholder="60123456789,6281234567890"
-                        className="mt-2 min-h-20 resize-y text-xs"
-                        onChange={(event) => {
-                          void handleAllowedNumbersChange(event.target.value)
-                        }}
-                      />
-                      <p className="mt-2 text-[10px] text-muted-foreground">
-                        Pisahkan nombor dengan koma. Nombor yang tidak masuk senarai tidak boleh trigger bot.
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-              )
-            }
-
-            if (item.key === "autoRespondUnknownCommand") {
-              return (
-                <div key={item.key} className="px-3 py-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold flex items-center gap-2">
-                        <Icon className="size-4 text-primary/80 shrink-0" />
-                        {item.title}
-                      </p>
-                      <p className="mt-1 text-[11px] text-muted-foreground">{item.desc}</p>
-                    </div>
-                    <Switch
-                      size="sm"
-                      checked={settings[item.key]}
-                      disabled={disabled}
-                      onCheckedChange={(checked) => {
-                        void updateSetting(item.key, checked)
-                      }}
-                    />
-                  </div>
-
-                  {settings.autoRespondUnknownCommand ? (
-                    <div className="mt-3 ml-6 space-y-2 rounded-lg border border-border/60 bg-muted/20 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-[11px] font-medium text-muted-foreground">Personal chat</p>
-                        <Switch
-                          size="sm"
-                          checked={settings.unknownCommandInPrivate}
-                          disabled={disabled}
-                          onCheckedChange={(checked) => {
-                            void updateSetting("unknownCommandInPrivate", checked)
-                          }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-[11px] font-medium text-muted-foreground">Group</p>
-                        <Switch
-                          size="sm"
-                          checked={settings.unknownCommandInGroup}
-                          disabled={disabled}
-                          onCheckedChange={(checked) => {
-                            void updateSetting("unknownCommandInGroup", checked)
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              )
-            }
-
-            return (
-              <div key={item.key} className="flex items-start justify-between gap-3 px-3 py-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold flex items-center gap-2">
-                    <Icon className="size-4 text-primary/80 shrink-0" />
-                    {item.title}
-                  </p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">{item.desc}</p>
-                </div>
-                <Switch
-                  size="sm"
-                  checked={settings[item.key]}
-                  disabled={disabled}
-                  onCheckedChange={(checked) => {
-                    void updateSetting(item.key, checked)
-                  }}
-                />
-              </div>
-            )
-          })}
+          {loading ? (
+            <Badge variant="outline" className="gap-1.5 self-start text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" />
+              Loading
+            </Badge>
+          ) : savingKey ? (
+            <Badge variant="outline" className="gap-1.5 self-start text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" />
+              Saving
+            </Badge>
+          ) : savedAt ? (
+            <Badge variant="outline" className="gap-1.5 self-start border-emerald-500/40 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="size-3" />
+              Saved
+            </Badge>
+          ) : null}
         </div>
 
         {error ? (
-          <p className="mt-3 text-xs text-red-600 dark:text-red-400">{error}</p>
+          <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-400">
+            {error}
+          </p>
         ) : null}
+      </div>
+
+      <div className="rounded-2xl border border-border/70 bg-card/90 p-4 md:p-5 shadow-sm">
+        <div className="flex items-center gap-2">
+          <Users className="size-4 text-primary/80" />
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Chat Access</p>
+        </div>
+
+        <div className="mt-3 divide-y divide-border/60 rounded-xl border border-border/60 bg-background/60">
+          <div className="px-3 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <groupRow.icon className="size-4 text-primary/80 shrink-0" />
+                  {groupRow.title}
+                </p>
+                <p className="mt-1 text-[11px] text-muted-foreground">{groupRow.desc}</p>
+              </div>
+              <Switch
+                size="sm"
+                checked={settings.respondInGroup}
+                disabled={disabled}
+                onCheckedChange={(checked) => {
+                  void updateSetting("respondInGroup", checked)
+                }}
+              />
+            </div>
+
+            {settings.respondInGroup ? (
+              <div className="mt-3 ml-6 rounded-lg border border-l-2 border-l-primary/50 border-border/60 bg-muted/20 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-medium flex items-center gap-1.5 text-muted-foreground">
+                    <ListFilter className="size-3.5" />
+                    Hanya group terpilih
+                  </p>
+                  <Switch
+                    size="sm"
+                    checked={settings.respondOnlySelectedGroups}
+                    disabled={disabled}
+                    onCheckedChange={(checked) => {
+                      void updateSetting("respondOnlySelectedGroups", checked)
+                    }}
+                  />
+                </div>
+
+                {settings.respondOnlySelectedGroups ? (
+                  <div className="mt-3 space-y-3">
+                    <Textarea
+                      value={settings.allowedGroups.join(",\n")}
+                      rows={3}
+                      disabled={disabled}
+                      placeholder="123456789012345@g.us, 987654321098765@g.us"
+                      className="min-h-20 resize-y text-xs"
+                      onChange={(event) => {
+                        void handleAllowedGroupsChange(normalizeGroupList(event.target.value))
+                      }}
+                    />
+
+                    {settings.allowedGroups.length ? (
+                      <div className="space-y-2">
+                        {settings.allowedGroups.map((groupId, index) => (
+                          <div key={`${groupId}-${index}`} className="flex items-center justify-between gap-2 rounded-md border border-border/70 bg-background/80 px-2 py-1.5">
+                            <span className="truncate text-[10px] text-muted-foreground">{groupId}</span>
+                            <Switch
+                              size="sm"
+                              checked
+                              disabled={disabled}
+                              onCheckedChange={() => {
+                                const nextGroups = settings.allowedGroups.filter((_, groupIndex) => groupIndex !== index)
+                                void handleAllowedGroupsChange(nextGroups)
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="flex items-start justify-between gap-3 px-3 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold flex items-center gap-2">
+                <privateRow.icon className="size-4 text-primary/80 shrink-0" />
+                {privateRow.title}
+              </p>
+              <p className="mt-1 text-[11px] text-muted-foreground">{privateRow.desc}</p>
+            </div>
+            <Switch
+              size="sm"
+              checked={settings.respondInPrivate}
+              disabled={disabled}
+              onCheckedChange={(checked) => {
+                void updateSetting("respondInPrivate", checked)
+              }}
+            />
+          </div>
+
+          <div className="px-3 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold flex items-center gap-2">
+                  <anyoneRow.icon className="size-4 text-primary/80 shrink-0" />
+                  {anyoneRow.title}
+                </p>
+                <p className="mt-1 text-[11px] text-muted-foreground">{anyoneRow.desc}</p>
+              </div>
+              <Switch
+                size="sm"
+                checked={settings.respondForAnyone}
+                disabled={disabled}
+                onCheckedChange={(checked) => {
+                  void updateSetting("respondForAnyone", checked)
+                }}
+              />
+            </div>
+
+            {!settings.respondForAnyone ? (
+              <div className="mt-3 ml-6 rounded-lg border border-l-2 border-l-primary/50 border-border/60 bg-muted/20 p-3">
+                <label className="block text-[11px] font-medium text-muted-foreground">Allowed_Numbers</label>
+                <Textarea
+                  value={settings.allowedNumbers}
+                  rows={2}
+                  disabled={disabled}
+                  placeholder="60123456789,6281234567890"
+                  className="mt-2 min-h-20 resize-y text-xs"
+                  onChange={(event) => {
+                    void handleAllowedNumbersChange(event.target.value)
+                  }}
+                />
+                <p className="mt-2 text-[10px] text-muted-foreground">
+                  Pisahkan nombor dengan koma. Nombor yang tidak masuk senarai tidak boleh trigger bot.
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border/70 bg-card/90 p-4 md:p-5 shadow-sm">
+        <div className="flex items-center gap-2">
+          <HelpCircle className="size-4 text-primary/80" />
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Unknown Command Handling</p>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-border/60 bg-background/60 px-3 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold flex items-center gap-2">
+                <unknownRow.icon className="size-4 text-primary/80 shrink-0" />
+                {unknownRow.title}
+              </p>
+              <p className="mt-1 text-[11px] text-muted-foreground">{unknownRow.desc}</p>
+            </div>
+            <Switch
+              size="sm"
+              checked={settings.autoRespondUnknownCommand}
+              disabled={disabled}
+              onCheckedChange={(checked) => {
+                void updateSetting("autoRespondUnknownCommand", checked)
+              }}
+            />
+          </div>
+
+          {settings.autoRespondUnknownCommand ? (
+            <div className="mt-3 ml-6 space-y-2 rounded-lg border border-l-2 border-l-primary/50 border-border/60 bg-muted/20 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] font-medium flex items-center gap-1.5 text-muted-foreground">
+                  <UserRound className="size-3.5" />
+                  Personal chat
+                </p>
+                <Switch
+                  size="sm"
+                  checked={settings.unknownCommandInPrivate}
+                  disabled={disabled}
+                  onCheckedChange={(checked) => {
+                    void updateSetting("unknownCommandInPrivate", checked)
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] font-medium flex items-center gap-1.5 text-muted-foreground">
+                  <Users className="size-3.5" />
+                  Group
+                </p>
+                <Switch
+                  size="sm"
+                  checked={settings.unknownCommandInGroup}
+                  disabled={disabled}
+                  onCheckedChange={(checked) => {
+                    void updateSetting("unknownCommandInGroup", checked)
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
