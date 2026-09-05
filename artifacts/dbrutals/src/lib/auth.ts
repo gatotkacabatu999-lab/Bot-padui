@@ -15,7 +15,9 @@ export async function fetchAuthStatus(): Promise<AuthStatus> {
     if (!res.ok) return { authenticated: false, authEnabled: true };
     return await res.json() as AuthStatus;
   } catch {
-    return { authenticated: false, authEnabled: false };
+    // Fail closed: if the API is unreachable (CORS, wrong origin, network
+    // error), assume auth is required rather than silently bypassing login.
+    return { authenticated: false, authEnabled: true };
   }
 }
 
