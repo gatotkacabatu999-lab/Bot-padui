@@ -137,10 +137,11 @@ export function BotDashboard() {
 
   const isPhonePairing = state?.pairingMethod === 'phone' || state?.status === 'pairing-phone' || state?.status === 'pairing-code'
   const isConnected = state?.status === 'connected'
-  const isPairingInProgress = state?.status === 'starting' || state?.status === 'qr' || state?.status === 'pairing-phone' || state?.status === 'pairing-code' || state?.status === 'reconnecting'
+  const isPairingInProgress = state?.status === 'starting' || state?.status === 'qr' || state?.status === 'reconnecting'
   const activePairingMethod = state?.pairingMethod ?? pairingMethod
   const isAlternatePairingMethod = (method: 'qr' | 'phone') => isConnected && activePairingMethod !== method
   const isSelectedMethodAlreadyRunning = isPairingInProgress && activePairingMethod === pairingMethod
+  // Pairing codes expire quickly, so once one is issued the button must stay clickable to request a fresh one.
   const isPairingRequestLocked = applyingPairing || isSelectedMethodAlreadyRunning || isConnected
 
   const applyPairingSelection = useCallback(async () => {
@@ -322,7 +323,7 @@ export function BotDashboard() {
                 onClick={() => void applyPairingSelection()}
                 disabled={isPairingRequestLocked}
               >
-                {applyingPairing ? 'Requesting pairing code...' : 'Get Pairing Code'}
+                {applyingPairing ? 'Requesting pairing code...' : state?.pairingCode ? 'Get New Pairing Code' : 'Get Pairing Code'}
               </Button>
 
               {pairingMessage ? (

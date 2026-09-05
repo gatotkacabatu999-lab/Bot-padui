@@ -322,7 +322,6 @@ export function BotReminder() {
               <Input
                 value={draft.earlyDays}
                 onChange={(e) => setDraft((prev) => ({ ...prev, earlyDays: e.target.value }))}
-                placeholder="Contoh: 10,5"
                 className="mt-1"
               />
               <p className="mt-1 text-[11px] text-muted-foreground">

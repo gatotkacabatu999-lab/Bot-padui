@@ -11,6 +11,10 @@ const alertVariants = cva(
         default: "bg-background text-foreground",
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        warning:
+          "border-[hsl(var(--accent-amber)/0.35)] bg-[hsl(var(--accent-amber)/0.14)] text-[hsl(var(--accent-amber))] [&>svg]:text-[hsl(var(--accent-amber))]",
+        success:
+          "border-[hsl(var(--accent-emerald)/0.35)] bg-[hsl(var(--accent-emerald)/0.14)] text-[hsl(var(--accent-emerald))] [&>svg]:text-[hsl(var(--accent-emerald))]",
       },
     },
     defaultVariants: {

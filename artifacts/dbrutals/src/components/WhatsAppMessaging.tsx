@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { CalendarClock, ContactRound, FileAudio, FileText, Image, ListChecks, LoaderCircle, MapPin, MessageCircleMore, Mic, Music2, Pencil, Phone, Plus, Search, Send, Smartphone, Smile, Trash2, Upload, UserRound, Video, Download } from "lucide-react"
+import { AlertTriangle, CalendarClock, CheckCircle2, ContactRound, FileAudio, FileText, Image, ListChecks, LoaderCircle, MapPin, MessageCircleMore, Mic, Music2, Pencil, Phone, Plus, Search, Send, Smartphone, Smile, Trash2, Upload, UserRound, Video, Download } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -599,13 +600,19 @@ function DeletedMessages() {
   return (
     <div className="space-y-4">
       {botStatus !== 'connected' ? (
-        <div className="rounded-xl border border-amber-300/60 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/30 dark:text-amber-200">
-          Bot belum disambungkan. Buka halaman Account dan lengkapkan QR atau pairing code. Hanya mesej yang diterima selepas bot tersambung boleh dipulihkan.
-        </div>
+        <Alert variant="warning">
+          <AlertTriangle className="size-4" />
+          <AlertDescription>
+            Bot belum disambungkan. Buka halaman Account dan lengkapkan QR atau pairing code. Hanya mesej yang diterima selepas bot tersambung boleh dipulihkan.
+          </AlertDescription>
+        </Alert>
       ) : (
-        <div className="rounded-xl border border-emerald-300/60 bg-emerald-50 p-3 text-sm text-emerald-900 dark:border-emerald-700/60 dark:bg-emerald-950/30 dark:text-emerald-200">
-          Bot tersambung dan sedang menangkap mesej baharu untuk personal, group, dan Status.
-        </div>
+        <Alert variant="success">
+          <CheckCircle2 className="size-4" />
+          <AlertDescription>
+            Bot tersambung dan sedang menangkap mesej baharu untuk personal, group, dan Status.
+          </AlertDescription>
+        </Alert>
       )}
 
       <div className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card p-3 sm:flex-row sm:items-center sm:justify-between">
@@ -717,7 +724,7 @@ function DeletedMessages() {
 }
 
 
-type ContactCategory = "Customer" | "Supplier" | "Support" | "Other"
+type ContactCategory = "Customer" | "Supplier" | "Support" | "Family" | "Parent" | "Sibling" | "Spouse" | "Friend" | "Colleague" | "Relative" | "Other"
 
 type ContactRecord = {
   id: string
@@ -1065,6 +1072,13 @@ export function ContactManager({ initialContacts }: ContactManagerProps = {}) {
                   <SelectItem value="Customer">Customer</SelectItem>
                   <SelectItem value="Supplier">Supplier</SelectItem>
                   <SelectItem value="Support">Support</SelectItem>
+                  <SelectItem value="Family">Family</SelectItem>
+                  <SelectItem value="Parent">Parent</SelectItem>
+                  <SelectItem value="Sibling">Sibling</SelectItem>
+                  <SelectItem value="Spouse">Spouse</SelectItem>
+                  <SelectItem value="Friend">Friend</SelectItem>
+                  <SelectItem value="Colleague">Colleague</SelectItem>
+                  <SelectItem value="Relative">Relative</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
