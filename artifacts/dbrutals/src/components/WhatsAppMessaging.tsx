@@ -366,6 +366,18 @@ function getDeletedContentLabel(message: DeletedMessage) {
   }
 }
 
+function getDeletedPreviewIcon(message: DeletedMessage) {
+  if (message.mediaType === 'image' || message.mediaType === 'sticker') return Image
+  if (message.mediaType === 'video') return Video
+  if (message.mediaType === 'audio') return message.isVoiceNote ? Mic : Music2
+  if (message.mediaType === 'document') return FileText
+  if (message.details?.location) return MapPin
+  if (message.details?.contact) return ContactRound
+  if (message.details?.poll) return ListChecks
+  if (message.details?.reaction) return Smile
+  return null
+}
+
 function renderDeletedMessageDetails(message: DeletedMessage) {
   const details = message.details
   if (details?.location) {
@@ -579,8 +591,9 @@ function DeletedMessages() {
         const sorted = [...chatMessages].sort((a, b) => new Date(a.changedAt).getTime() - new Date(b.changedAt).getTime())
         const newest = sorted[sorted.length - 1]
         const title = newest?.chatName || newest?.senderName || chatJid
-        const previewText = newest?.currentText || newest?.originalText || (newest?.mediaType ? `[${newest.mediaType}]` : '[Kandungan tidak sempat ditangkap]')
-        return { chatJid, title, previewText, messages: sorted }
+        const previewText = newest?.currentText || newest?.originalText || (newest ? getDeletedContentLabel(newest) : '[Kandungan tidak sempat ditangkap]')
+        const previewIcon = newest ? getDeletedPreviewIcon(newest) : null
+        return { chatJid, title, previewText, previewIcon, messages: sorted }
       })
       .sort((a, b) => new Date(b.messages[b.messages.length - 1].changedAt).getTime() - new Date(a.messages[a.messages.length - 1].changedAt).getTime())
   }, [filteredMessages])
@@ -644,7 +657,7 @@ function DeletedMessages() {
       ) : null}
 
       {!loading && !error && filteredMessages.length ? <div className="space-y-3">
-        {groupedMessages.map(({ chatJid, title, previewText, messages: chatMessages }) => (
+        {groupedMessages.map(({ chatJid, title, previewText, previewIcon: PreviewIcon, messages: chatMessages }) => (
           <article key={chatJid} className="rounded-xl border border-border/70 bg-card p-3 shadow-sm transition-colors hover:bg-accent/20">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
@@ -667,8 +680,9 @@ function DeletedMessages() {
               </div>
             </div>
 
-            <p className="mt-3 truncate text-xs text-muted-foreground">
-              {previewText.length > 90 ? `${previewText.slice(0, 90)}...` : previewText}
+            <p className="mt-3 flex items-center gap-1.5 truncate text-xs text-muted-foreground">
+              {PreviewIcon ? <PreviewIcon className="size-3.5 shrink-0" /> : null}
+              <span className="truncate">{previewText.length > 90 ? `${previewText.slice(0, 90)}...` : previewText}</span>
             </p>
           </article>
         ))}
